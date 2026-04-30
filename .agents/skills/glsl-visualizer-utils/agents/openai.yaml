@@ -1,0 +1,4 @@
+interface:
+  display_name: "GLSL Visualizer Utils"
+  short_description: "Guia para shaders GLSL del visualizer"
+  default_prompt: "Use $glsl-visualizer-utils to edit the GLSL visualizer shader safely."

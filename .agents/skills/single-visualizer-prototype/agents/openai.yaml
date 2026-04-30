@@ -1,0 +1,4 @@
+interface:
+  display_name: "Single Visualizer Prototype"
+  short_description: "Mantiene el prototipo simple y enfocado"
+  default_prompt: "Use $single-visualizer-prototype to keep this as a compact one-song visualizer."

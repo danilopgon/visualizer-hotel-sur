@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hotel Sur Visual Style"
+  short_description: "Guia visual para el mood Hotel Sur"
+  default_prompt: "Use $hotel-sur-visual-style to preserve the dark cinematic visual language."
