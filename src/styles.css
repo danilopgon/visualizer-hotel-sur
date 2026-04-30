@@ -35,26 +35,3 @@ input {
   height: 100%;
   display: block;
 }
-
-.visualizer-title {
-  position: fixed;
-  left: clamp(16px, 3vw, 40px);
-  bottom: clamp(16px, 3vw, 36px);
-  display: grid;
-  gap: 4px;
-  pointer-events: none;
-  color: rgba(242, 239, 235, 0.74);
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.8);
-}
-
-.visualizer-title span {
-  font-size: 11px;
-}
-
-.visualizer-title strong {
-  color: rgba(245, 80, 51, 0.82);
-  font-size: clamp(15px, 1.5vw, 22px);
-  font-weight: 500;
-}

@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Leva, useControls } from "leva";
+import { useCallback, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { useKeyboardControls } from "./hooks/useKeyboardControls";
 import fragmentShader from "./shaders/enCualquierLugar.frag?raw";
@@ -18,14 +17,14 @@ type Uniforms = {
   uSpeed: { value: number };
 };
 
-type VisualizerControls = {
-  grain: number;
-  distortion: number;
-  fog: number;
-  orangeTint: number;
-  pulseStrength: number;
-  speed: number;
-};
+const VISUAL_PARAMETERS = {
+  grain: 1,
+  distortion: 1,
+  fog: 1,
+  orangeTint: 1,
+  pulseStrength: 1,
+  speed: 2,
+} as const;
 
 const fallbackTexture = () => {
   const data = new Uint8Array([6, 6, 6, 255]);
@@ -39,16 +38,6 @@ export function Visualizer() {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const uniformsRef = useRef<Uniforms | null>(null);
   const pulseRef = useRef(0);
-  const [debugVisible, setDebugVisible] = useState(true);
-
-  const controls = useControls("En Cualquier Lugar", {
-    grain: { value: 0.42, min: 0, max: 1, step: 0.01 },
-    distortion: { value: 0.34, min: 0, max: 1, step: 0.01 },
-    fog: { value: 0.58, min: 0, max: 1, step: 0.01 },
-    orangeTint: { value: 0.3, min: 0, max: 1, step: 0.01 },
-    pulseStrength: { value: 0.55, min: 0, max: 1, step: 0.01 },
-    speed: { value: 0.72, min: 0.1, max: 2, step: 0.01 },
-  }) as VisualizerControls;
 
   const toggleFullscreen = useCallback(() => {
     const root = rootRef.current;
@@ -69,10 +58,19 @@ export function Visualizer() {
     pulseRef.current = 1;
   }, []);
 
+  const previousSong = useCallback(() => {
+    console.info("previousSong requested");
+  }, []);
+
+  const nextSong = useCallback(() => {
+    console.info("nextSong requested");
+  }, []);
+
   useKeyboardControls({
     onFullscreen: toggleFullscreen,
-    onToggleDebug: () => setDebugVisible((visible) => !visible),
     onPulse: triggerPulse,
+    onPreviousSong: previousSong,
+    onNextSong: nextSong,
   });
 
   useEffect(() => {
@@ -106,13 +104,13 @@ export function Visualizer() {
       uVideo: { value: darkTexture },
       uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
       uTime: { value: 0 },
-      uGrain: { value: controls.grain },
-      uDistortion: { value: controls.distortion },
-      uFog: { value: controls.fog },
-      uOrangeTint: { value: controls.orangeTint },
+      uGrain: { value: VISUAL_PARAMETERS.grain },
+      uDistortion: { value: VISUAL_PARAMETERS.distortion },
+      uFog: { value: VISUAL_PARAMETERS.fog },
+      uOrangeTint: { value: VISUAL_PARAMETERS.orangeTint },
       uPulse: { value: 0 },
-      uPulseStrength: { value: controls.pulseStrength },
-      uSpeed: { value: controls.speed },
+      uPulseStrength: { value: VISUAL_PARAMETERS.pulseStrength },
+      uSpeed: { value: VISUAL_PARAMETERS.speed },
     };
     uniformsRef.current = uniforms;
 
@@ -180,29 +178,9 @@ export function Visualizer() {
     };
   }, []);
 
-  useEffect(() => {
-    const uniforms = uniformsRef.current;
-
-    if (!uniforms) {
-      return;
-    }
-
-    uniforms.uGrain.value = controls.grain;
-    uniforms.uDistortion.value = controls.distortion;
-    uniforms.uFog.value = controls.fog;
-    uniforms.uOrangeTint.value = controls.orangeTint;
-    uniforms.uPulseStrength.value = controls.pulseStrength;
-    uniforms.uSpeed.value = controls.speed;
-  }, [controls]);
-
   return (
     <div className="visualizer-shell" ref={rootRef}>
       <div className="visualizer-canvas" ref={mountRef} />
-      <div className="visualizer-title">
-        <span>Hotel Sur</span>
-        <strong>En Cualquier Lugar</strong>
-      </div>
-      <Leva hidden={!debugVisible} collapsed />
     </div>
   );
 }

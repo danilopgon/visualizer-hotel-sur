@@ -1,15 +1,18 @@
 import { useEffect } from "react";
+import { LIVE_CONTROL_BINDINGS } from "../liveControls";
 
 type KeyboardControls = {
   onFullscreen: () => void;
-  onToggleDebug: () => void;
   onPulse: () => void;
+  onPreviousSong: () => void;
+  onNextSong: () => void;
 };
 
 export function useKeyboardControls({
   onFullscreen,
-  onToggleDebug,
   onPulse,
+  onPreviousSong,
+  onNextSong,
 }: KeyboardControls) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -21,13 +24,17 @@ export function useKeyboardControls({
         onFullscreen();
       }
 
-      if (event.code === "KeyH") {
-        onToggleDebug();
-      }
-
       if (event.code === "Space") {
         event.preventDefault();
         onPulse();
+      }
+
+      if (event.code === LIVE_CONTROL_BINDINGS.previousSong.key) {
+        onPreviousSong();
+      }
+
+      if (event.code === LIVE_CONTROL_BINDINGS.nextSong.key) {
+        onNextSong();
       }
     };
 
@@ -36,5 +43,5 @@ export function useKeyboardControls({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [onFullscreen, onPulse, onToggleDebug]);
+  }, [onFullscreen, onNextSong, onPreviousSong, onPulse]);
 }

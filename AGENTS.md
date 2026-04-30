@@ -9,7 +9,6 @@ Single-song visualizer prototype for Hotel Sur's "En Cualquier Lugar". This repo
 - TypeScript
 - Three.js
 - GLSL shaders
-- Leva for temporary debug controls
 
 ## Commands
 
@@ -21,10 +20,14 @@ Single-song visualizer prototype for Hotel Sur's "En Cualquier Lugar". This repo
 
 - Keep this as a simple prototype.
 - Do not add routing yet.
-- Do not add a multi-song or multi-visualizer system yet.
+- Do not add a multi-song or multi-visualizer runtime yet.
+- The future direction is a live set visualizer with every setlist song mapped to
+  its own video, but only scale toward that when the runtime need is explicit.
 - Keep the shader and visualizer code compact.
 - Keep video assets in `public/videos/`.
-- Treat the Leva control panel as temporary; final direction should come from defined visual parameters, not a permanent UI.
+- Final direction should come from defined visual parameters, not a permanent UI.
+- Keep live controls compact: keyboard actions may exist before the full MIDI or
+  setlist runtime, but avoid premature control surfaces.
 - Preserve a dark, slow, cinematic Hotel Sur mood rather than an EDM visualizer mood.
 
 ## Change Conventions
