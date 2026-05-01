@@ -58,20 +58,23 @@ void main() {
   vec3 video = texture2D(uVideo, uv).rgb;
   float luma = dot(video, vec3(0.299, 0.587, 0.114));
 
-  float vignette = smoothstep(0.88, 0.22, length(centered));
+  // Deeper vignette for projection — stronger center bloom, truer black at edges
+  float vignette = smoothstep(0.95, 0.18, length(centered));
   float fog = fbm(uv * 1.25 + vec2(time * 0.018, time * 0.012));
   float lifted = mix(luma, 0.5 + (luma - 0.5) * 0.72, uFog);
   lifted = mix(lifted, lifted + fog * 0.16, uFog * 0.65);
-  lifted *= mix(0.62, 1.0, vignette);
+  lifted *= mix(0.48, 1.0, vignette);
 
   vec3 monochrome = vec3(lifted);
   vec3 orange = vec3(0.9608, 0.3137, 0.2);
   float highlight = smoothstep(0.48, 0.96, lifted + fog * 0.22 + pulse * 0.35);
-  vec3 color = mix(monochrome, orange, highlight * uOrangeTint * 0.42);
+  vec3 color = mix(monochrome, orange, highlight * uOrangeTint * 0.52);
 
+  // Exaggerated grain for large-scale projection legibility
   float grain = hash(uv * uResolution + fract(uTime * 24.0));
-  color += (grain - 0.5) * uGrain * 0.18;
+  color += (grain - 0.5) * uGrain * 0.32;
   color += pulse * vec3(0.09, 0.035, 0.02);
+
   color = pow(max(color, 0.0), vec3(1.08));
 
   gl_FragColor = vec4(color, 1.0);

@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { useKeyboardControls } from "./hooks/useKeyboardControls";
 import fragmentShader from "./shaders/enCualquierLugar.frag?raw";
 import vertexShader from "./shaders/vertex.glsl?raw";
+import { SONGS, INITIAL_SONG_INDEX } from "./songs";
 
 type Uniforms = {
   uVideo: { value: THREE.Texture };
@@ -18,7 +19,7 @@ type Uniforms = {
 };
 
 const VISUAL_PARAMETERS = {
-  grain: 1,
+  grain: 1.8,
   distortion: 1,
   fog: 1,
   orangeTint: 1,
@@ -36,8 +37,9 @@ const fallbackTexture = () => {
 export function Visualizer() {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const mountRef = useRef<HTMLDivElement | null>(null);
-  const uniformsRef = useRef<Uniforms | null>(null);
   const pulseRef = useRef(0);
+  const songIndexRef = useRef(INITIAL_SONG_INDEX);
+  const loadSongCallbackRef = useRef<((index: number) => void) | null>(null);
 
   const toggleFullscreen = useCallback(() => {
     const root = rootRef.current;
@@ -59,11 +61,15 @@ export function Visualizer() {
   }, []);
 
   const previousSong = useCallback(() => {
-    console.info("previousSong requested");
+    const newIndex = (songIndexRef.current - 1 + SONGS.length) % SONGS.length;
+    songIndexRef.current = newIndex;
+    loadSongCallbackRef.current?.(newIndex);
   }, []);
 
   const nextSong = useCallback(() => {
-    console.info("nextSong requested");
+    const newIndex = (songIndexRef.current + 1) % SONGS.length;
+    songIndexRef.current = newIndex;
+    loadSongCallbackRef.current?.(newIndex);
   }, []);
 
   useKeyboardControls({
@@ -94,7 +100,8 @@ export function Visualizer() {
     const darkTexture = fallbackTexture();
     let videoTexture: THREE.VideoTexture | null = null;
 
-    video.src = "/videos/en-cualquier-lugar.mp4";
+    const initialSong = SONGS[songIndexRef.current];
+    video.src = initialSong.videoPath;
     video.loop = true;
     video.muted = true;
     video.playsInline = true;
@@ -112,8 +119,6 @@ export function Visualizer() {
       uPulseStrength: { value: VISUAL_PARAMETERS.pulseStrength },
       uSpeed: { value: VISUAL_PARAMETERS.speed },
     };
-    uniformsRef.current = uniforms;
-
     const material = new THREE.ShaderMaterial({
       uniforms,
       vertexShader,
@@ -135,17 +140,34 @@ export function Visualizer() {
       uniforms.uVideo.value = videoTexture;
     };
 
+    const loadSong = (index: number) => {
+      const song = SONGS[index];
+      video.pause();
+      video.src = song.videoPath;
+      video.load();
+      video.play().catch(() => {
+        console.warn(`[visualizer] Could not play video: ${song.videoPath}`);
+      });
+      console.info(`[visualizer] Loading: ${song.title}`);
+    };
+
+    loadSongCallbackRef.current = loadSong;
+
     video.addEventListener("canplay", enableVideoTexture);
     video.play().catch(() => {
       uniforms.uVideo.value = darkTexture;
+      console.warn(`[visualizer] Could not play video: ${initialSong.videoPath}`);
     });
+    console.info(`[visualizer] Loading loop: ${initialSong.videoPath}`);
 
     const clock = new THREE.Clock();
     let frameId = 0;
 
     const render = () => {
       frameId = window.requestAnimationFrame(render);
-      pulseRef.current = THREE.MathUtils.damp(pulseRef.current, 0, 3.8, clock.getDelta());
+      const delta = clock.getDelta();
+
+      pulseRef.current = THREE.MathUtils.damp(pulseRef.current, 0, 3.8, delta);
       uniforms.uTime.value = clock.elapsedTime;
       uniforms.uPulse.value = pulseRef.current;
       renderer.render(scene, camera);
@@ -165,6 +187,7 @@ export function Visualizer() {
       window.cancelAnimationFrame(frameId);
       window.removeEventListener("resize", resize);
       video.removeEventListener("canplay", enableVideoTexture);
+      loadSongCallbackRef.current = null;
       video.pause();
       video.removeAttribute("src");
       video.load();
@@ -174,7 +197,6 @@ export function Visualizer() {
       videoTexture?.dispose();
       renderer.dispose();
       renderer.domElement.remove();
-      uniformsRef.current = null;
     };
   }, []);
 

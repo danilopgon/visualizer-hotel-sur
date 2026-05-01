@@ -3,8 +3,8 @@
 First prototype for "En Cualquier Lugar".
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 Place the loop at `public/videos/en-cualquier-lugar.mp4`.
