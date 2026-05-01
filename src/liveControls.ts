@@ -8,5 +8,3 @@ export const LIVE_CONTROL_BINDINGS = {
     midiNote: 61,
   },
 } as const;
-
-export type LiveControlAction = keyof typeof LIVE_CONTROL_BINDINGS;
